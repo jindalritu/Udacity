@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import matplotlib.pyplot as plt
+from sklearn import neighbors
 from prep_terrain_data import makeTerrainData
 from class_vis import prettyPicture
 
@@ -30,6 +31,14 @@ plt.show()
 
 ### your code here!  name your classifier object clf if you want the 
 ### visualization code (prettyPicture) to show you the decision boundary
+import math
+print(math.sqrt(len(features_train)))
+clf = neighbors.KNeighborsClassifier(n_neighbors=4)
+clf.fit(features_train, labels_train)
+pred = clf.predict(features_test)
+print("predicted value", pred)
+from sklearn import metrics
+print("accuracy is", metrics.accuracy_score(pred, labels_test))
 
 
 

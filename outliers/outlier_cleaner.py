@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+import math
 
 def outlierCleaner(predictions, ages, net_worths):
     """
@@ -14,7 +14,19 @@ def outlierCleaner(predictions, ages, net_worths):
     cleaned_data = []
 
     ### your code goes here
+    ## sort cleaned_data according to errors i.e 2
+    ## discard the 10% point having highest error or consider the points having smallest error
+    errors = (net_worths - predictions)**2
 
-    
+    cleaned_data = zip(ages, net_worths, errors )
+
+    cleaned_data = sorted(cleaned_data, key=lambda x:x[2])
+    print(cleaned_data)
+    cleaned_data = cleaned_data[:81]
+
+
+    #limit = int(len(net_worths) * 0.1)
+    #res = zip(*cleaned_data)
+    #print(str(res))
     return cleaned_data
 

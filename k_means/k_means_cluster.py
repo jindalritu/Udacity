@@ -39,7 +39,7 @@ def Draw(pred, features, poi, mark_poi=False, name="image.png", f1_name="feature
 
 
 ### load in the dict of dicts containing all the data on each person in the dataset
-data_dict = pickle.load( open("../final_project/final_project_dataset.pkl", "r") )
+data_dict = pickle.load( open("../final_project/final_project_dataset_unix.pkl", "rb") )
 ### there's an outlier--remove it! 
 data_dict.pop("TOTAL", 0)
 
@@ -48,8 +48,9 @@ data_dict.pop("TOTAL", 0)
 ### can be any key in the person-level dictionary (salary, director_fees, etc.) 
 feature_1 = "salary"
 feature_2 = "exercised_stock_options"
+feature_3 ="total_payments"
 poi  = "poi"
-features_list = [poi, feature_1, feature_2]
+features_list = [poi, feature_1, feature_2, feature_3]
 data = featureFormat(data_dict, features_list )
 poi, finance_features = targetFeatureSplit( data )
 
@@ -58,13 +59,41 @@ poi, finance_features = targetFeatureSplit( data )
 ### you'll want to change this line to 
 ### for f1, f2, _ in finance_features:
 ### (as it's currently written, the line below assumes 2 features)
-for f1, f2 in finance_features:
-    plt.scatter( f1, f2 )
+for f1, f2,f3 in finance_features:
+    plt.scatter( f1, f2 , f3)
 plt.show()
 
 ### cluster here; create predictions of the cluster labels
 ### for the data and store them to a list called pred
 
+from sklearn.cluster import KMeans
+kmeans = KMeans(n_clusters=2).fit(finance_features)
+pred = kmeans.predict(finance_features)
+
+max_exercised=[]
+max_salary=[]
+for key, value in data_dict.items():
+    if value["exercised_stock_options"] != "NaN":
+        #max_exercised.append((key, value["exercised_stock_options"]))
+        max_exercised.append(value["exercised_stock_options"])
+    if value["salary"] != "NaN":
+        max_salary.append(value["salary"])
+#print(sorted(max_exercised,key=lambda x:x[1])[-1:])
+#print(sorted(max_exercised, key=lambda x:x[1])[0])
+print(max(max_salary))
+print(min(max_salary))
+from sklearn.preprocessing import MinMaxScaler
+
+salary_new = numpy.array([[min(max_salary)], [200000.0], [max(max_salary)]])
+ex_new = numpy.array([[min(max_exercised)], [1000000.0], [max(max_exercised)]])
+scaler = MinMaxScaler()
+rescale_salary = scaler.fit_transform(salary_new)
+rescale_ex = scaler.fit_transform(ex_new)
+print("rescale salay is", rescale_salary)
+print("rescale ex is", rescale_ex)
+
+
+# or we can use max(max_exercised) or min(max_exercised) to get max. or minimum value
 
 
 
@@ -73,4 +102,4 @@ plt.show()
 try:
     Draw(pred, finance_features, poi, mark_poi=False, name="clusters.pdf", f1_name=feature_1, f2_name=feature_2)
 except NameError:
-    print "no predictions object named pred found, no clusters to plot"
+    print("no predictions object named pred found, no clusters to plot")
